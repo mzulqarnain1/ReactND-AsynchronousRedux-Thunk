@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UDACITY TODO GOALS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.7.2/redux.min.js"></script>
+    <script src="https://unpkg.com/react@16.3.0-alpha.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="https://tylermcginnis.com/goals-todos-api/index.js"></script>
+    <script src="https://unpkg.com/redux-thunk@2.2.0/dist/redux-thunk.min.js"></script>
+
+</head>
+<body>
+    <div id="app"/>
+
+    <script type="text/javascript" src="index.js"></script>
+
+    <!-- REACT PART OF OUR CODE -->
+    <script type="text/babel">
+        class List extends React.Component{
+            render(){
+                const { items } = this.props
+                return(
+                    <ul>
+                        { items.map((item) => (
+                            <li key={item.id}>
+                                <span
+                                    style={{'textDecoration': item.complete ? 'line-through' : 'none'}}
+                                    onClick={() => this.props.toggle(item)}
+                                >
+                                    {item.name}
+                                </span>
+                                <button onClick={() => this.props.remove(item)}>
+                                    X
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )
+            }
+        }
+        class Todos extends React.Component{
+            render(){
+                const removeItem = (todo) => {
+                    this.props.store.dispatch(handleRemoveTodo(todo))
+                }
+                const toggleItem = (todo) => {
+                    this.props.store.dispatch(handleToggleTodo(todo.id))
+                }
+                const addItem = (e) => {
+                    e.preventDefault()
+                    this.props.store.dispatch(handleAddTodo(
+                        this.input.value,
+                        () => this.input.value = ''
+                    ))
+                }
+                return(
+                    <div>
+                        <h1> TODOS </h1>
+                        <label>
+                            <input
+                                type="text"
+                                placeholder="Todo"
+                                ref={(input) => this.input = input}
+                            />
+                        </label>
+                        <button onClick={addItem}>Add Todo</button>
+                        <List items={this.props.todos} remove={removeItem} toggle={toggleItem}/>
+                    </div>
+                )
+            }
+        }
+        class Goals extends React.Component{
+            render(){
+                const removeItem = (goal) => {
+                    this.props.store.dispatch(handleRemoveGoal(goal))
+                }
+                const toggleItem = (goal) => {
+                    this.props.store.dispatch(handleToggleGoal(goal.id))
+                }
+                const addItem = (e) => {
+                    e.preventDefault()
+                    this.props.store.dispatch(handleAddGoal(
+                        this.input.value,
+                        () => this.input.value = ''
+                    ))
+                }
+                return(
+                    <div>
+                        <h1> GOALS </h1>
+                        <label>
+                            <input
+                                type="text"
+                                placeholder="Goal"
+                                ref={(input) => this.input = input}
+                            />
+                        </label>
+                        <button onClick={addItem}>Add Goal</button>
+                        <List items={this.props.goals} remove={removeItem} toggle={toggleItem}/>
+                    </div>
+                )
+            }
+        }
+        class App extends React.Component{
+            componentDidMount(){
+                const { store } = this.props
+                store.dispatch(handleInitialData())
+                store.subscribe(() => this.forceUpdate())
+            }
+            render(){
+                const { store } = this.props
+                const { todos, goals, loading } = store.getState()
+
+                if(loading === true){
+                    return <h1>Loading ...</h1>
+                }
+                return(
+                    <div>
+                        <Todos todos={todos} store={this.props.store}/>
+                        <Goals goals={goals} store={this.props.store}/>
+                    </div>
+                )
+            }
+        }
+
+        ReactDOM.render(<App store={store}/>, document.getElementById('app'))
+    </script>
+
+</body>
+</html>
